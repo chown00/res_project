@@ -1,0 +1,298 @@
+<?xml version = "1.0"?>
+<robot name = "res_robot" xmlns:xacro = "http://www.ros.org/wiki/xacro">
+
+	<!-- Import colors -->
+	<xacro:include filename = "$(find res_project)/urdf/materials.xacro" />
+
+	<!-- Robot Dimension Constants -->
+	<xacro:property name = "CHASSIS_LENGTH" value = "3" />
+	<xacro:property name = "CHASSIS_WIDTH" value = "1" />
+	<xacro:property name = "CHASSIS_HEIGHT" value = "0.2" />
+	<xacro:property name = "LOWERLEG_LENGTH" value = "0.8" />
+	<xacro:property name = "LOWERLEG_WIDTH" value = "0.2" />
+	<xacro:property name = "LOWERLEG_HEIGHT" value = "0.05" />
+	<xacro:property name = "UPPERLEG_LENGTH" value = "1" />
+	<xacro:property name = "UPPERLEG_WIDTH" value = "0.3" />
+	<xacro:property name = "UPPERLEG_HEIGHT" value = "0.05" />
+	<xacro:property name = "UPPERJOINT_INIT" value = "-0.8" />
+	<xacro:property name = "LOWERJOINT_INIT" value = "1.9" />
+	<xacro:property name = "SHOULDERJOINT_INIT" value = "0.2" />
+	<xacro:property name = "UPPERJOINT_LIMIT" value = "1.57" />
+	<xacro:property name = "LOWERJOINT_LIMIT" value = "1.57" />
+	<xacro:property name = "SHOULDERJOINT_LIMIT" value = "1.57" />
+	<xacro:property name = "DAMP" value = "0.7" />
+	<xacro:property name = "VERT_INIT" value = "1.1" />
+
+	<!-- Chassis Link -->
+	<link name = "chassis_link">
+		<visual>
+			<origin xyz = "0 0 ${VERT_INIT}" rpy = "0 0 0" />
+			<geometry>
+				<box size = "${CHASSIS_LENGTH} ${CHASSIS_WIDTH} ${CHASSIS_HEIGHT}" />
+			</geometry>
+			<material name = "GREY" />
+		</visual>
+		<collision>
+			<origin xyz = "0 0 ${VERT_INIT}" rpy = "0 0 0" />
+			<geometry>
+				<box size = "${CHASSIS_LENGTH} ${CHASSIS_WIDTH} ${CHASSIS_HEIGHT}" />
+			</geometry>
+		</collision>
+	</link>
+
+	<!-- Front Left Leg -->
+	<!-- FLU joint to Chassis -->
+	<link name = "flujoint_link" />
+	<joint name = "joint_flu_chassis_z" type = "revolute">
+		<parent link = "chassis_link" />
+		<child link = "flujoint_link" />
+		<origin xyz = "${CHASSIS_LENGTH / 2 - UPPERLEG_WIDTH} ${CHASSIS_WIDTH / 2 + UPPERLEG_HEIGHT} ${CHASSIS_HEIGHT / 2 + VERT_INIT}" rpy = "1.570795 ${1.570795 - UPPERJOINT_INIT} 0" />
+		<axis xyz = "0 0 1" />
+		<dynamics damping = "${DAMP}" />
+		<limit effort = "100.0" velocity = "0.5" lower = "${-UPPERJOINT_LIMIT - UPPERJOINT_INIT}" upper = "${UPPERJOINT_LIMIT - UPPERJOINT_INIT}" />
+	</joint>
+	<joint name = "joint_flu_chassis_y" type = "revolute">
+		<parent link = "flujoint_link" />
+		<child link = "flu_link" />
+		<origin xyz = "0 0 0" rpy = "0 ${SHOULDERJOINT_INIT} 0" />
+		<axis xyz = "0 1 0" />
+		<dynamics damping = "${DAMP}" />
+		<limit effort = "100.0" velocity = "0.5" lower = "0" upper = "${SHOULDERJOINT_LIMIT}" />
+	</joint>
+	
+	<!-- FLU Link (Front Left Upper Leg) -->
+	<link name = "flu_link">
+		<visual>
+			<origin xyz = "${UPPERLEG_LENGTH / 2} 0 ${UPPERLEG_HEIGHT / 2}" rpy = "0 0 0" />
+			<geometry>
+				<box size = "${UPPERLEG_LENGTH} ${UPPERLEG_WIDTH} ${UPPERLEG_HEIGHT}" />
+			</geometry>
+			<material name = "RED" />
+		</visual>
+		<collision>
+			<origin xyz = "0 0 0" rpy = "0 0 0" />
+			<geometry>
+				<box size = "${UPPERLEG_LENGTH} ${UPPERLEG_WIDTH} ${UPPERLEG_HEIGHT}" />
+			</geometry>
+		</collision>
+	</link>
+	
+	<!-- FLL joint to FLU -->
+	<joint name = "joint_fll_flu" type = "revolute">
+		<parent link = "flu_link" />
+		<child link = "fll_link" />
+		<origin xyz = "${UPPERLEG_LENGTH} 0 ${-UPPERLEG_HEIGHT}" rpy = "0 0 ${LOWERJOINT_INIT}" />
+		<axis xyz = "0 0 1" />
+		<dynamics damping = "${DAMP}" />
+		<limit effort = "100.0" velocity = "0.5" lower = "${-LOWERJOINT_LIMIT}" upper = "${LOWERJOINT_LIMIT}" />
+	</joint>
+	
+	<!-- FLL Link (Front Left Lower Leg) -->
+	<link name = "fll_link">
+		<visual>
+			<origin xyz = "${LOWERLEG_LENGTH / 2} 0 ${LOWERLEG_HEIGHT / 2}" rpy = "0 0 0" />
+			<geometry>
+				<box size = "${LOWERLEG_LENGTH} ${LOWERLEG_WIDTH} ${LOWERLEG_HEIGHT}" />
+			</geometry>
+			<material name = "BLUE" />
+		</visual>
+		<collision>
+			<origin xyz = "0 0 0" rpy = "0 0 0" />
+			<geometry>
+				<box size = "${LOWERLEG_LENGTH} ${LOWERLEG_WIDTH} ${LOWERLEG_HEIGHT}" />
+			</geometry>
+		</collision>
+	</link>
+	
+	<!-- Back Left Leg -->
+	<!-- BLU joint to Chassis -->
+	<link name = "blujoint_link" />
+	<joint name = "joint_blu_chassis_z" type = "revolute">
+		<parent link = "chassis_link" />
+		<child link = "blujoint_link" />
+		<origin xyz = "${-(CHASSIS_LENGTH / 2 - UPPERLEG_WIDTH)} ${CHASSIS_WIDTH / 2 + UPPERLEG_HEIGHT} ${CHASSIS_HEIGHT / 2 + VERT_INIT}" rpy = "1.570795 ${1.570795 - UPPERJOINT_INIT} 0" />
+		<axis xyz = "0 0 1" />
+		<dynamics damping = "${DAMP}" />
+		<limit effort = "100.0" velocity = "0.5" lower = "${-UPPERJOINT_LIMIT - UPPERJOINT_INIT}" upper = "${UPPERJOINT_LIMIT - UPPERJOINT_INIT}" />
+	</joint>
+	<joint name = "joint_blu_chassis_y" type = "revolute">
+		<parent link = "blujoint_link" />
+		<child link = "blu_link" />
+		<origin xyz = "0 0 0" rpy = "0 ${SHOULDERJOINT_INIT} 0" />
+		<axis xyz = "0 1 0" />
+		<dynamics damping = "${DAMP}" />
+		<limit effort = "100.0" velocity = "0.5" lower = "0" upper = "${SHOULDERJOINT_LIMIT}" />
+	</joint>
+	
+	<!-- BLU Link (Back Left Upper Leg) -->
+	<link name = "blu_link">
+		<visual>
+			<origin xyz = "${UPPERLEG_LENGTH / 2} 0 ${UPPERLEG_HEIGHT / 2}" rpy = "0 0 0" />
+			<geometry>
+				<box size = "${UPPERLEG_LENGTH} ${UPPERLEG_WIDTH} ${UPPERLEG_HEIGHT}" />
+			</geometry>
+			<material name = "RED" />
+		</visual>
+		<collision>
+			<origin xyz = "0 0 0" rpy = "0 0 0" />
+			<geometry>
+				<box size = "${UPPERLEG_LENGTH} ${UPPERLEG_WIDTH} ${UPPERLEG_HEIGHT}" />
+			</geometry>
+		</collision>
+	</link>
+	
+	<!-- BLL joint to BLU -->
+	<joint name = "joint_bll_blu" type = "revolute">
+		<parent link = "blu_link" />
+		<child link = "bll_link" />
+		<origin xyz = "${UPPERLEG_LENGTH} 0 ${-UPPERLEG_HEIGHT}" rpy = "0 0 ${LOWERJOINT_INIT}" />
+		<axis xyz = "0 0 1" />
+		<dynamics damping = "${DAMP}" />
+		<limit effort = "100.0" velocity = "0.5" lower = "${-LOWERJOINT_LIMIT}" upper = "${LOWERJOINT_LIMIT}" />
+	</joint>
+	
+	<!-- BLL Link (Back Left Lower Leg) -->
+	<link name = "bll_link">
+		<visual>
+			<origin xyz = "${LOWERLEG_LENGTH / 2} 0 ${LOWERLEG_HEIGHT / 2}" rpy = "0 0 0" />
+			<geometry>
+				<box size = "${LOWERLEG_LENGTH} ${LOWERLEG_WIDTH} ${LOWERLEG_HEIGHT}" />
+			</geometry>
+			<material name = "BLUE" />
+		</visual>
+		<collision>
+			<origin xyz = "0 0 0" rpy = "0 0 0" />
+			<geometry>
+				<box size = "${LOWERLEG_LENGTH} ${LOWERLEG_WIDTH} ${LOWERLEG_HEIGHT}" />
+			</geometry>
+		</collision>
+	</link>
+	
+	<!-- Front Right Leg -->
+	<!-- FRU joint to Chassis -->
+	<link name = "frujoint_link" />
+	<joint name = "joint_fru_chassis_z" type = "revolute">
+		<parent link = "chassis_link" />
+		<child link = "frujoint_link" />
+		<origin xyz = "${CHASSIS_LENGTH / 2 - UPPERLEG_WIDTH} ${-(CHASSIS_WIDTH / 2)} ${CHASSIS_HEIGHT / 2 + VERT_INIT}" rpy = "1.570795 ${1.570795 - UPPERJOINT_INIT} 0" />
+		<axis xyz = "0 0 1" />
+		<dynamics damping = "${DAMP}" />
+		<limit effort = "100.0" velocity = "0.5" lower = "${-UPPERJOINT_LIMIT - UPPERJOINT_INIT}" upper = "${UPPERJOINT_LIMIT - UPPERJOINT_INIT}" />
+	</joint>
+	<joint name = "joint_fru_chassis_y" type = "revolute">
+		<parent link = "frujoint_link" />
+		<child link = "fru_link" />
+		<origin xyz = "0 0 0" rpy = "0 ${-SHOULDERJOINT_INIT} 0" />
+		<axis xyz = "0 1 0" />
+		<dynamics damping = "${DAMP}" />
+		<limit effort = "100.0" velocity = "0.5" lower = "${-SHOULDERJOINT_LIMIT}" upper = "0" />
+	</joint>
+	
+	<!-- FRU Link (Front Right Upper Leg) -->
+	<link name = "fru_link">
+		<visual>
+			<origin xyz = "${UPPERLEG_LENGTH / 2} 0 ${UPPERLEG_HEIGHT / 2}" rpy = "0 0 0" />
+			<geometry>
+				<box size = "${UPPERLEG_LENGTH} ${UPPERLEG_WIDTH} ${UPPERLEG_HEIGHT}" />
+			</geometry>
+			<material name = "RED" />
+		</visual>
+		<collision>
+			<origin xyz = "0 0 0" rpy = "0 0 0" />
+			<geometry>
+				<box size = "${UPPERLEG_LENGTH} ${UPPERLEG_WIDTH} ${UPPERLEG_HEIGHT}" />
+			</geometry>
+		</collision>
+	</link>
+	
+	<!-- FRL joint to FRU -->
+	<joint name = "joint_frl_fru" type = "revolute">
+		<parent link = "fru_link" />
+		<child link = "frl_link" />
+		<origin xyz = "${UPPERLEG_LENGTH} 0 ${UPPERLEG_HEIGHT}" rpy = "0 0 ${LOWERJOINT_INIT}" />
+		<axis xyz = "0 0 1" />
+		<dynamics damping = "${DAMP}" />
+		<limit effort = "100.0" velocity = "0.5" lower = "${-LOWERJOINT_LIMIT}" upper = "${LOWERJOINT_LIMIT}" />
+	</joint>
+	
+	<!-- FRL Link (Front Right Lower Leg) -->
+	<link name = "frl_link">
+		<visual>
+			<origin xyz = "${LOWERLEG_LENGTH / 2} 0 ${LOWERLEG_HEIGHT / 2}" rpy = "0 0 0" />
+			<geometry>
+				<box size = "${LOWERLEG_LENGTH} ${LOWERLEG_WIDTH} ${LOWERLEG_HEIGHT}" />
+			</geometry>
+			<material name = "BLUE" />
+		</visual>
+		<collision>
+			<origin xyz = "0 0 0" rpy = "0 0 0" />
+			<geometry>
+				<box size = "${LOWERLEG_LENGTH} ${LOWERLEG_WIDTH} ${LOWERLEG_HEIGHT}" />
+			</geometry>
+		</collision>
+	</link>
+	
+	<!-- Back Right Leg -->
+	<!-- BRU joint to Chassis -->
+	<link name = "brujoint_link" />
+	<joint name = "joint_bru_chassis_z" type = "revolute">
+		<parent link = "chassis_link" />
+		<child link = "brujoint_link" />
+		<origin xyz = "${-(CHASSIS_LENGTH / 2 - UPPERLEG_WIDTH)} ${-(CHASSIS_WIDTH / 2)} ${CHASSIS_HEIGHT / 2 + VERT_INIT}" rpy = "1.570795 ${1.570795 - UPPERJOINT_INIT} 0" />
+		<axis xyz = "0 0 1" />
+		<dynamics damping = "${DAMP}" />
+		<limit effort = "100.0" velocity = "0.5" lower = "${-UPPERJOINT_LIMIT - UPPERJOINT_INIT}" upper = "${UPPERJOINT_LIMIT - UPPERJOINT_INIT}" />
+	</joint>
+	<joint name = "joint_bru_chassis_y" type = "revolute">
+		<parent link = "brujoint_link" />
+		<child link = "bru_link" />
+		<origin xyz = "0 0 0" rpy = "0 ${-SHOULDERJOINT_INIT} 0" />
+		<axis xyz = "0 1 0" />
+		<dynamics damping = "${DAMP}" />
+		<limit effort = "100.0" velocity = "0.5" lower = "${-SHOULDERJOINT_LIMIT}" upper = "0" />
+	</joint>
+	
+	<!-- BRU Link (Back Right Upper Leg) -->
+	<link name = "bru_link">
+		<visual>
+			<origin xyz = "${UPPERLEG_LENGTH / 2} 0 ${UPPERLEG_HEIGHT / 2}" rpy = "0 0 0" />
+			<geometry>
+				<box size = "${UPPERLEG_LENGTH} ${UPPERLEG_WIDTH} ${UPPERLEG_HEIGHT}" />
+			</geometry>
+			<material name = "RED" />
+		</visual>
+		<collision>
+			<origin xyz = "0 0 0" rpy = "0 0 0" />
+			<geometry>
+				<box size = "${UPPERLEG_LENGTH} ${UPPERLEG_WIDTH} ${UPPERLEG_HEIGHT}" />
+			</geometry>
+		</collision>
+	</link>
+	
+	<!-- BRL joint to BRU -->
+	<joint name = "joint_brl_bru" type = "revolute">
+		<parent link = "bru_link" />
+		<child link = "brl_link" />
+		<origin xyz = "${UPPERLEG_LENGTH} 0 ${UPPERLEG_HEIGHT}" rpy = "0 0 ${LOWERJOINT_INIT}" />
+		<axis xyz = "0 0 1" />
+		<dynamics damping = "${DAMP}" />
+		<limit effort = "100.0" velocity = "0.5" lower = "${-LOWERJOINT_LIMIT}" upper = "${LOWERJOINT_LIMIT}" />
+	</joint>
+	
+	<!-- BRL Link (Back Right Lower Leg) -->
+	<link name = "brl_link">
+		<visual>
+			<origin xyz = "${LOWERLEG_LENGTH / 2} 0 ${LOWERLEG_HEIGHT / 2}" rpy = "0 0 0" />
+			<geometry>
+				<box size = "${LOWERLEG_LENGTH} ${LOWERLEG_WIDTH} ${LOWERLEG_HEIGHT}" />
+			</geometry>
+			<material name = "BLUE" />
+		</visual>
+		<collision>
+			<origin xyz = "0 0 0" rpy = "0 0 0" />
+			<geometry>
+				<box size = "${LOWERLEG_LENGTH} ${LOWERLEG_WIDTH} ${LOWERLEG_HEIGHT}" />
+			</geometry>
+		</collision>
+	</link>
+</robot>

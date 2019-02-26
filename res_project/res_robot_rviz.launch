@@ -1,0 +1,25 @@
+<launch>
+	<!-- values passed by command line input -->
+	<arg name = "model" />
+	<!-- And expand xacro to urdf -->
+	<param name = "robot_description"
+		  command = "$(find xacro)/xacro --inorder
+		 						'$(find res_project)/urdf/$(arg model)'" />
+	
+	<!-- Start 3 nodes: joint_state_publisher, robot_state_publisher and rviz -->
+	<node name = "joint_state_publisher"
+		pkg = "joint_state_publisher"
+		type = "joint_state_publisher" >
+		<param name = "use_gui" value = "TRUE" />
+	</node>
+		
+	<node name = "robot_state_publisher"
+		pkg = "robot_state_publisher"
+		type = "state_publisher" />
+		
+		
+	<!-- Visualize Robot in RVIZ -->
+	<node name = "rviz" pkg = "rviz" type = "rviz"
+		args = "-d $(find res_project)/urdf.rviz"
+		required = "true" />
+</launch>
